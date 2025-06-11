@@ -137,15 +137,43 @@ elif menu == "5. 스트리머의 맵별 스탯":
 
 elif menu == "6. 스트리머의 맵-요원별 스탯":
     st.header("🧩 스트리머의 맵-요원별 스탯")
-    selected_streamer = st.selectbox("스트리머를 선택하세요", sorted(df["스트리머 이름"].unique()), key="streamer_map_agent")
-    subset = df[df["스트리머 이름"] == selected_streamer]
-    selected_map = st.selectbox("맵을 선택하세요", sorted(subset["맵"].unique()), key="map_by_streamer")
-    filtered = subset[subset["맵"] == selected_map]
-    stats = filtered.groupby("사용한 요원").agg(agg_dict)
-    stats = compute_stats(stats)
-    stats = stats.sort_values("평균 전투 점수", ascending=True)
-    styled = style_dataframe(stats[column_order])
-    st.dataframe(styled, use_container_width=True, height=800)
+    streamer_options = sorted(df["스트리머 이름"].unique())
 
+    if not streamer_options:
+        st.info("선택된 조건에 해당하는 스트리머가 없습니다.")
+    else:
+        if 'selected_streamer_6' not in st.session_state or st.session_state.selected_streamer_6 not in streamer_options:
+            st.session_state.selected_streamer_6 = streamer_options[0]
 
+        selected_streamer = st.selectbox(
+            "스트리머를 선택하세요",
+            streamer_options,
+            key="streamer_map_agent_6",
+            index=streamer_options.index(st.session_state.selected_streamer_6)
+        )
+        st.session_state.selected_streamer_6 = selected_streamer
+
+        subset = df[df["스트리머 이름"] == selected_streamer]
+        map_options = sorted(subset["맵"].unique())
+
+        if not map_options:
+            st.info("선택된 스트리머에 해당하는 맵이 없습니다.")
+        else:
+            if 'selected_map_6' not in st.session_state or st.session_state.selected_map_6 not in map_options:
+                st.session_state.selected_map_6 = map_options[0]
+
+            selected_map = st.selectbox(
+                "맵을 선택하세요",
+                map_options,
+                key="map_by_streamer_6",
+                index=map_options.index(st.session_state.selected_map_6)
+            )
+            st.session_state.selected_map_6 = selected_map
+
+            filtered = subset[subset["맵"] == selected_map]
+            stats = filtered.groupby("사용한 요원").agg(agg_dict)
+            stats = compute_stats(stats)
+            stats = stats.sort_values("평균 전투 점수", ascending=True)
+            styled = style_dataframe(stats[column_order])
+            st.dataframe(styled, use_container_width=True, height=800)
 
