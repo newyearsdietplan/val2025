@@ -7,6 +7,25 @@ st.set_page_config(layout="wide")
 # 데이터
 df = pd.read_csv("data.csv")
 
+# 요원 역할 분류
+agent_roles = {
+    "타격대": ["네온", "레이나", "레이즈", "아이소", "요루", "웨이레이", "제트", "피닉스"],
+    "척후대": ["게코", "브리치", "소바", "스카이", "케이/오", "테호", "페이드"],
+    "감시자": ["데드록", "바이스", "사이퍼", "세이지", "체임버", "킬조이"],
+    "전략가": ["바이퍼", "브림스톤", "아스트라", "오멘", "클로브", "하버"]
+}
+
+# 필터 체크박스
+all_maps = sorted(df["맵"].unique())
+selected_maps = st.sidebar.multiselect("맵 필터", all_maps, default=all_maps)
+selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles.keys()))
+selected_agents = sum([agent_roles[role] for role in selected_roles], [])
+
+# 요원, 맵 필터
+df = df[df["사용한 요원"].isin(selected_agents)]
+df = df[df["맵"].isin(selected_maps)]
+df = df[df["사용한 요원"].isin(selected_agents)]
+
 # 승패 변환
 df["승리"] = df["승패"].map({"v": 1, "l": 0})
 
