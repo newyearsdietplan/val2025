@@ -92,8 +92,8 @@ if menu == "1. 스트리머별 종합 스탯":
     st.header("📊 스트리머별 종합 스탯")
     stats = df.groupby("스트리머 이름").agg(agg_dict)
     stats = compute_stats(stats)
-    stats = stats.sort_values("평균 전투 점수", ascending=True)
-    stats = stats.sort_values("평균 전투 점수", ascending=True)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
     styled = style_dataframe(stats[column_order])
     st.dataframe(styled, use_container_width=True, height=800)
 
@@ -103,7 +103,7 @@ elif menu == "2. 맵별 스트리머 스탯":
     subset = df[df["맵"] == selected_map]
     stats = subset.groupby("스트리머 이름").agg(agg_dict)
     stats = compute_stats(stats)
-    stats = stats.sort_values("평균 전투 점수", ascending=True)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
     styled = style_dataframe(stats[column_order])
     st.dataframe(styled, use_container_width=True, height=800)
 
@@ -113,7 +113,7 @@ elif menu == "3. 스트리머의 요원별 스탯":
     subset = df[df["스트리머 이름"] == selected_streamer]
     stats = subset.groupby("사용한 요원").agg(agg_dict)
     stats = compute_stats(stats)
-    stats = stats.sort_values("평균 전투 점수", ascending=True)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
     styled = style_dataframe(stats[column_order])
     st.dataframe(styled, use_container_width=True, height=800)
 
@@ -131,7 +131,7 @@ elif menu == "5. 스트리머의 맵별 스탯":
     subset = df[df["스트리머 이름"] == selected_streamer]
     stats = subset.groupby("맵").agg(agg_dict)
     stats = compute_stats(stats)
-    stats = stats.sort_values("평균 전투 점수", ascending=True)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
     styled = style_dataframe(stats[column_order])
     st.dataframe(styled, use_container_width=True, height=800)
 
@@ -173,7 +173,7 @@ elif menu == "6. 스트리머의 맵-요원별 스탯":
             filtered = subset[subset["맵"] == selected_map]
             stats = filtered.groupby("사용한 요원").agg(agg_dict)
             stats = compute_stats(stats)
-            stats = stats.sort_values("평균 전투 점수", ascending=True)
+            stats = stats.sort_values("평균 전투 점수", ascending=False)
             styled = style_dataframe(stats[column_order])
             st.dataframe(styled, use_container_width=True, height=800)
 
