@@ -70,9 +70,8 @@ menu = st.sidebar.radio("보기 항목을 선택하세요", (
 ))
 
 # 컬럼 순서
-column_order = ["총 경기 수", "승률", "평균 전투 점수", "평균 효율", "평균 첫 킬", "평균 KD", "평균 KDA", "총 승리 수", "총 킬", "총 데스", "총 어시스트"]
+column_order = ["티어", "총 경기 수", "승률", "평균 전투 점수", "평균 효율", "평균 첫 킬", "평균 KD", "평균 KDA", "총 승리 수", "평균 킬", "평균 데스", "평균 어시스트"]
 
-# 공통 처리 함수
 def compute_stats(grouped_df):
     grouped_df.columns = [
         "총 경기 수", "총 킬", "총 데스", "총 어시스트",
@@ -80,19 +79,30 @@ def compute_stats(grouped_df):
         "평균 전투 점수", "평균 효율", "평균 KD", "평균 KDA",
         "총 승리 수", "승률"
     ]
+    # 총 킬, 데스, 어시스트를 평균으로 변경
+    grouped_df["평균 킬"] = grouped_df["총 킬"] / grouped_df["총 경기 수"]
+    grouped_df["평균 데스"] = grouped_df["총 데스"] / grouped_df["총 경기 수"]
+    grouped_df["평균 어시스트"] = grouped_df["총 어시스트"] / grouped_df["총 경기 수"]
+    grouped_df = grouped_df.drop(columns=["총 킬", "총 데스", "총 어시스트"])
     grouped_df = grouped_df.sort_values("평균 전투 점수")
     return grouped_df
 
 # 포맷 정의
 def style_dataframe(df):
-    return df.style.format({
+    styled = df.style.format({
         "승률": "{:.2f}",
         "평균 전투 점수": "{:.2f}",
         "평균 효율": "{:.2f}",
         "평균 첫 킬": "{:.2f}",
         "평균 KD": "{:.2f}",
-        "평균 KDA": "{:.2f}"
+        "평균 KDA": "{:.2f}",
+        "평균 킬": "{:.1f}",
+        "평균 데스": "{:.1f}",
+        "평균 어시스트": "{:.1f}"
     })
+    if "티어" in df.columns:
+        styled = styled.set_properties(subset=["티어"], **{"text-align": "center", "width": "30px"})
+    return styled
 
 agg_dict = {
     "경기 번호": "nunique",
