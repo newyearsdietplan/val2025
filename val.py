@@ -47,11 +47,8 @@ menu = st.sidebar.radio("보기 항목을 선택하세요", (
     "3. 스트리머의 요원별 스탯",
     "5. 스트리머의 맵별 스탯",
     "6. 스트리머의 맵-요원별 스탯"
+    "4. 경기별 스트리머 스탯"
 ))
-
-st.sidebar.markdown("<br>", unsafe_allow_html=True)
-
-menu_game = st.sidebar.radio("", ("4. 경기별 스트리머 스탯",), label_visibility="collapsed")
 
 # 컬럼 순서
 column_order = ["총 경기 수", "승률", "평균 전투 점수", "평균 효율", "평균 첫 킬", "평균 KD", "평균 KDA", "총 승리 수", "총 킬", "총 데스", "총 어시스트"]
