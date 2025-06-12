@@ -70,7 +70,7 @@ menu = st.sidebar.radio("보기 항목을 선택하세요", (
 ))
 
 # 컬럼 순서
-column_order = ["티어", "총 경기 수", "승률", "평균 전투 점수", "평균 효율", "평균 첫 킬", "평균 KD", "평균 KDA", "총 승리 수", "평균 킬", "평균 데스", "평균 어시스트"]
+column_order = ["총 경기 수", "승률", "평균 전투 점수", "평균 효율", "평균 첫 킬", "평균 KD", "평균 KDA", "총 승리 수", "평균 킬", "평균 데스", "평균 어시스트"]
 
 def compute_stats(grouped_df):
     grouped_df.columns = [
@@ -100,8 +100,6 @@ def style_dataframe(df):
         "평균 데스": "{:.1f}",
         "평균 어시스트": "{:.1f}"
     })
-    if "티어" in df.columns:
-        styled = styled.set_properties(subset=["티어"], **{"text-align": "center", "width": "30px"})
     return styled
 
 agg_dict = {
