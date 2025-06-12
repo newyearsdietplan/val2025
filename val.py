@@ -148,7 +148,8 @@ elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
     available_dates = sorted(df["날짜"].unique())
     selected_date = st.selectbox("날짜를 선택하세요", available_dates, key="date_select")
-    game_ids = df[df["날짜"] == selected_date]["경기 번호"].unique()        map_name = game_df["맵"].iloc[0]
+    game_ids = df[df["날짜"] == selected_date]["경기 번호"].unique()        
+    map_name = game_df["맵"].iloc[0]
         label = f"{gid}번 경기 - {map_name} ({', '.join(players)})"
         game_options.append((label, gid))
 
