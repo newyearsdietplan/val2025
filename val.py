@@ -15,13 +15,32 @@ agent_roles = {
     "전략가": ["바이퍼", "브림스톤", "아스트라", "오멘", "클로브", "하버"]
 }
 
-# 필터 체크박스
+# 티어 필터
+tiers = {
+    "A티어": ["강지형", "김뚜띠", "조별하", "짜누"],
+    "B티어": ["감제이", "뱅", "푸린", "핑맨"],
+    "C티어": ["미친개정강지", "눈꽃", "마뫄", "빅헤드"],
+    "D티어": ["아구이뽀", "울프", "유봄냥", "임나은"],
+    "E티어": ["고수달", "따효니", "러너", "백곰파"]
+}
+
+# '용병' 티어 자동 분류 추가
+tiered_streamers = sum(tiers.values(), [])
+all_streamers = df["스트리머 이름"].unique()
+mercenaries = sorted(list(set(all_streamers) - set(tiered_streamers)))
+if mercenaries:
+    tiers["용병"] = mercenaries
+
+selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=list(tiers.keys()))
+selected_tier_streamers = sum([tiers[tier] for tier in selected_tiers], [])
 all_maps = sorted(df["맵"].unique())
 selected_maps = st.sidebar.multiselect("맵 필터", all_maps, default=all_maps)
 selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles.keys()))
 selected_agents = sum([agent_roles[role] for role in selected_roles], [])
 
-# 요원, 맵 필터
+# 선택된 요원과 맵만 포함
+# 티어 필터 적용
+df = df[df["스트리머 이름"].isin(selected_tier_streamers)]
 df = df[df["사용한 요원"].isin(selected_agents)]
 df = df[df["맵"].isin(selected_maps)]
 df = df[df["사용한 요원"].isin(selected_agents)]
