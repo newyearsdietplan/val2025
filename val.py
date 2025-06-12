@@ -144,30 +144,31 @@ elif menu == "3. 스트리머의 요원별 스탯":
     styled = style_dataframe(stats[column_order])
     st.dataframe(styled, use_container_width=True, height=800)
 
-elif menu == "4. 경기별 스트리머 스탭":
-    st.header("📅 경기별 스트리머 스탭")
+elif menu == "4. 경기별 스트리머 스탯":
+    st.header("📅 경기별 스트리머 스탯")
     available_dates = sorted(df["날짜"].unique())
     selected_date = st.selectbox("날짜를 선택하세요", available_dates, key="date_select")
-    game_ids = df[df["날짜"] == selected_date]["경기 번호"].unique()
-    game_options = []
-    for gid in sorted(game_ids):
-        game_df = df[df["경기 번호"] == gid]
-        players = game_df["스트리머 이름"].unique()
-        map_name = game_df["맵"].iloc[0]
+    game_ids = df[df["날짜"] == selected_date]["경기 번호"].unique()        map_name = game_df["맵"].iloc[0]
         label = f"{gid}번 경기 - {map_name} ({', '.join(players)})"
         game_options.append((label, gid))
+
     selected_label = st.selectbox("경기 번호를 선택하세요", [opt[0] for opt in game_options], key="game_select")
     selected_game = dict(game_options)[selected_label]
     subset = df[df["경기 번호"] == selected_game].copy()
     for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
         subset[col] = subset[col].map(lambda x: f"{x:.2f}")
+    st.data_editor(
+        subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "KD", "KDA", "첫 킬", "승패"]],
+        use_container_width=True,
+        height=400,
+        num_rows="dynamic"
+    )
 
     def highlight_win(row):
         color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
         return [f"background-color: {color}" for _ in row]
 
-    display_df = subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "KD", "KDA", "첫 킬", "승패"]]
-    styled = display_df.style.apply(highlight_win, axis=1)
+    styled = subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "KD", "KDA", "첫 킬", "승패"]].style.apply(highlight_win, axis=1)
     st.dataframe(styled, use_container_width=True, height=400)
     
     # 이미지 경로 및 출력
