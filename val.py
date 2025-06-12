@@ -170,8 +170,8 @@ elif menu == "4. 경기별 스트리머 스탯":
     )
 
     def highlight_win(row):
-    color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
-    return [f"background-color: {color}" for _ in row]
+        color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
+        return [f"background-color: {color}" for _ in row]
 
     styled = subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "KD", "KDA", "첫 킬", "승패"]].style.apply(highlight_win, axis=1)
     st.dataframe(styled, use_container_width=True, height=400)
