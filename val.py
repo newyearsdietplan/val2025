@@ -119,7 +119,16 @@ elif menu == "3. 스트리머의 요원별 스탯":
 
 elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
-    selected_game = st.selectbox("경기 번호를 선택하세요", sorted(df["경기 번호"].unique()), key="game_select")
+    available_dates = sorted(df["날짜"].unique())
+    selected_date = st.selectbox("날짜를 선택하세요", available_dates, key="date_select")
+    game_ids = df[df["날짜"] == selected_date]["경기 번호"].unique()
+    game_options = []
+    for gid in sorted(game_ids):
+        players = df[df["경기 번호"] == gid]["스트리머 이름"].unique()
+        label = f"{gid}번 경기 ({', '.join(players)})"
+        game_options.append((label, gid))
+    selected_label = st.selectbox("경기 번호를 선택하세요", [opt[0] for opt in game_options], key="game_select")
+    selected_game = dict(game_options)[selected_label]
     subset = df[df["경기 번호"] == selected_game].copy()
     for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
         subset[col] = subset[col].map(lambda x: f"{x:.2f}")
