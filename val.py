@@ -151,8 +151,10 @@ elif menu == "4. 경기별 스트리머 스탯":
     game_ids = df[df["날짜"] == selected_date]["경기 번호"].unique()
     game_options = []
     for gid in sorted(game_ids):
-        players = df[df["경기 번호"] == gid]["스트리머 이름"].unique()
-        label = f"{gid}번 경기 ({', '.join(players)})"
+        game_df = df[df["경기 번호"] == gid]
+        players = game_df["스트리머 이름"].unique()
+        map_name = game_df["맵"].iloc[0]
+        label = f"{gid}번 경기 - {map_name} ({', '.join(players)})"
         game_options.append((label, gid))
     selected_label = st.selectbox("경기 번호를 선택하세요", [opt[0] for opt in game_options], key="game_select")
     selected_game = dict(game_options)[selected_label]
