@@ -132,7 +132,12 @@ elif menu == "4. 경기별 스트리머 스탯":
     subset = df[df["경기 번호"] == selected_game].copy()
     for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
         subset[col] = subset[col].map(lambda x: f"{x:.2f}")
-    st.data_editor(subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "KD", "KDA", "첫 킬", "승패"]], use_container_width=True, height=800)
+    st.data_editor(
+        subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "KD", "KDA", "첫 킬", "승패"]],
+        use_container_width=True,
+        height=400,
+        num_rows="dynamic"
+    )
 
     # 이미지 경로 및 출력
     image_filename = f"screenshot/{selected_date}-{selected_game}.png"
