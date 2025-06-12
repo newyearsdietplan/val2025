@@ -134,6 +134,10 @@ elif menu == "4. 경기별 스트리머 스탯":
         subset[col] = subset[col].map(lambda x: f"{x:.2f}")
     st.data_editor(subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "KD", "KDA", "첫 킬", "승패"]], use_container_width=True, height=800)
 
+    # 이미지 경로 및 출력
+    image_filename = f"screenshot/{selected_date}-{selected_game}.png"
+    st.image(image_filename, caption=image_filename)
+
 elif menu == "5. 스트리머의 맵별 스탯":
     st.header("🧭 스트리머의 맵별 스탯")
     selected_streamer = st.selectbox("스트리머를 선택하세요", sorted(df["스트리머 이름"].unique()))
