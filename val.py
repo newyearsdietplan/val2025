@@ -120,6 +120,13 @@ agg_dict = {
     "승리": ["sum", "mean"]
 }
 
+def format_streamer_label(name):
+    tier = streamer_tier_map.get(name, "-")
+    return f"[-] {name}" if tier == "용병" else f"[{tier}] {name}"
+
+def extract_streamer_name(label):
+    return label.split("] ")[-1]
+
 if menu == "1. 스트리머별 종합 스탯":
     st.header("📊 스트리머별 종합 스탯")
     stats = df.groupby("스트리머 이름").agg(agg_dict)
