@@ -166,7 +166,7 @@ elif menu == "2. 맵별 스트리머 스탯":
 
 elif menu == "3. 스트리머의 요원별 스탯":
     st.header("🧍‍♀️ 스트리머의 요원별 스탯")
-    streamer_options = sorted(df["스트리머 이름"].unique())
+    streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
     if not streamer_options:
         st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
     else:
@@ -220,7 +220,7 @@ elif menu == "4. 경기별 스트리머 스탯":
 
 elif menu == "5. 스트리머의 맵별 스탯":
     st.header("🧭 스트리머의 맵별 스탯")  
-    streamer_options = sorted(df["스트리머 이름"].unique())
+    streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
     if not streamer_options:
         st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
     else:
@@ -236,7 +236,7 @@ elif menu == "5. 스트리머의 맵별 스탯":
 
 elif menu == "6. 스트리머의 맵-요원별 스탯":
     st.header("🧩 스트리머의 맵-요원별 스탯")
-    streamer_options = sorted(df["스트리머 이름"].unique())
+    streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
     if not streamer_options:
         st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
     else:
@@ -289,7 +289,7 @@ elif menu == "6. 스트리머의 맵-요원별 스탯":
 elif menu == "7. 스트리머의 모든 경기 확인":
     st.header("🧾 스트리머의 모든 경기 기록")
 
-    streamer_options = sorted(df["스트리머 이름"].unique())
+    streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
     if not streamer_options:
         st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
     else:
