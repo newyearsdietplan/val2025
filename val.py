@@ -176,7 +176,10 @@ elif menu == "3. 스트리머의 요원별 스탯":
 elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
     
-    df_all = pd.read_csv("data.csv")
+    df_all = pd.read_csv("data.csv")  # 원본 데이터에서 필터 없이 사용
+    df_all["KDA"] = df_all.apply(compute_kda, axis=1)
+    df_all["KD"] = df_all.apply(compute_kd, axis=1)
+
     available_dates = sorted(df_all["날짜"].unique())
     if not available_dates:
         st.info("경기 데이터가 없습니다.")
@@ -194,7 +197,8 @@ elif menu == "4. 경기별 스트리머 스탯":
         selected_game = dict(game_options)[selected_label]
         subset = df_all[df_all["경기 번호"] == selected_game].copy()
         for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
-            subset[col] = subset[col].map(lambda x: f"{x:.2f}")
+            if col in subset.columns:
+                subset[col] = subset[col].map(lambda x: f"{x:.2f}")
 
         def highlight_win(row):
             color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
@@ -204,10 +208,6 @@ elif menu == "4. 경기별 스트리머 스탯":
         styled = display_df.style.apply(highlight_win, axis=1)
         st.dataframe(styled, use_container_width=True, height=400)
 
-        image_filename = f"screenshot/{selected_date}-{selected_game}.png"
-        st.image(image_filename, caption=image_filename)
-
-        # 이미지 경로 및 출력
         image_filename = f"screenshot/{selected_date}-{selected_game}.png"
         st.image(image_filename, caption=image_filename)
 
