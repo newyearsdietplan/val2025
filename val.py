@@ -152,7 +152,10 @@ elif menu == "2. 맵별 스트리머 스탯":
 
 elif menu == "3. 스트리머의 요원별 스탯":
     st.header("🧍‍♀️ 스트리머의 요원별 스탯")
-    selected_streamer = st.selectbox("스트리머를 선택하세요", sorted(df["스트리머 이름"].unique()), key="streamer_select")
+    streamer_options = sorted(df["스트리머 이름"].unique())
+    label_map = {format_streamer_label(name): name for name in streamer_options}
+    selected_label = st.selectbox("스트리머를 선택하세요", list(label_map.keys()), key="streamer_select")
+    selected_streamer = label_map[selected_label]
     subset = df[df["스트리머 이름"] == selected_streamer]
     stats = subset.groupby("사용한 요원").agg(agg_dict)
     stats = compute_stats(stats)
