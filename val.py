@@ -31,6 +31,11 @@ mercenaries = sorted(list(set(all_streamers) - set(tiered_streamers)))
 if mercenaries:
     tiers["용병"] = mercenaries
 
+streamer_tier_map = {}
+for tier, streamers in tiers.items():
+    for s in streamers:
+        streamer_tier_map[s] = tier
+
 selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=list(tiers.keys()))
 selected_tier_streamers = sum([tiers[tier] for tier in selected_tiers], [])
 all_maps = sorted(df["맵"].unique())
