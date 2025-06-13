@@ -222,9 +222,14 @@ elif menu == "6. 스트리머의 맵-요원별 스탯":
     if 'selected_streamer_6' not in st.session_state:
         st.session_state.selected_streamer_6 = list(label_map.keys())[0]
 
+    # fallback
+    if st.session_state.selected_streamer_6 not in label_map:
+        st.session_state.selected_streamer_6 = list(label_map.keys())[0]
+
     selected_label = st.selectbox(
         "스트리머를 선택하세요",
         list(label_map.keys()),
+        index=list(label_map.keys()).index(st.session_state.selected_streamer_6),
         key="streamer_map_agent_6"
     )
     if selected_label != st.session_state.selected_streamer_6:
