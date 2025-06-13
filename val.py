@@ -36,7 +36,7 @@ for tier, streamers in tiers.items():
     for s in streamers:
         streamer_tier_map[s] = tier
 
-selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=list(tiers.keys()))
+selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=[t for t in tiers.keys() if t != "용병"])
 selected_tier_streamers = sum([tiers[tier] for tier in selected_tiers], [])
 all_maps = sorted(df["맵"].unique())
 selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles.keys()))
