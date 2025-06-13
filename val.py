@@ -128,6 +128,12 @@ def format_streamer_label(name):
 def extract_streamer_name(label):
     return label.split("] ")[-1]
 
+# 티어 오름차순 정렬
+def tier_sort_key(name):
+    tier_order = ["A", "B", "C", "D", "E", "용병"]
+    tier = streamer_tier_map.get(name, "용병")
+    return (tier_order.index(tier), name)
+
 if menu == "1. 스트리머별 종합 스탯":
     st.header("📊 스트리머별 종합 스탯")
     stats = df.groupby("스트리머 이름").agg(agg_dict)
