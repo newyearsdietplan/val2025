@@ -225,7 +225,6 @@ elif menu == "6. 스트리머의 맵-요원별 스탯":
     selected_label = st.selectbox(
         "스트리머를 선택하세요",
         list(label_map.keys()),
-        index=list(label_map.keys()).index(st.session_state.selected_streamer_6),
         key="streamer_map_agent_6"
     )
     if selected_label != st.session_state.selected_streamer_6:
@@ -262,3 +261,4 @@ elif menu == "6. 스트리머의 맵-요원별 스탯":
             st.dataframe(styled, use_container_width=True, height=800)
         else:
             st.info("선택된 조건에 해당하는 데이터가 없습니다.")
+
