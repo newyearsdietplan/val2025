@@ -217,53 +217,52 @@ elif menu == "5. 스트리머의 맵별 스탯":
 elif menu == "6. 스트리머의 맵-요원별 스탯":
     st.header("🧩 스트리머의 맵-요원별 스탯")
     streamer_options = sorted(df["스트리머 이름"].unique())
-    label_map = {format_streamer_label(name): name for name in streamer_options}
-
-    if 'selected_streamer_6' not in st.session_state:
-        st.session_state.selected_streamer_6 = list(label_map.keys())[0]
-
-    # fallback
-    if st.session_state.selected_streamer_6 not in label_map:
-        st.session_state.selected_streamer_6 = list(label_map.keys())[0]
-
-    selected_label = st.selectbox(
-        "스트리머를 선택하세요",
-        list(label_map.keys()),
-        index=list(label_map.keys()).index(st.session_state.selected_streamer_6),
-        key="streamer_map_agent_6"
-    )
-    if selected_label != st.session_state.selected_streamer_6:
-        st.session_state.selected_streamer_6 = selected_label
-        st.rerun()
-
-    selected_streamer = label_map[selected_label]
-    subset = df[df["스트리머 이름"] == selected_streamer]
-    map_options = sorted(subset["맵"].unique())
-
-    if not map_options:
-        st.info("선택한 스트리머가 현재 필터 조건에 해당하는 맵 데이터를 가지고 있지 않습니다.")
+    if not streamer_options:
+        st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
     else:
-        if 'selected_map_6' not in st.session_state or st.session_state.selected_map_6 not in map_options:
-            st.session_state.selected_map_6 = map_options[0]
+        label_map = {format_streamer_label(name): name for name in streamer_options}
 
-        selected_map = st.selectbox(
-            "맵을 선택하세요",
-            map_options,
-            index=map_options.index(st.session_state.selected_map_6),
-            key="map_by_streamer_6"
+        if 'selected_streamer_6' not in st.session_state or st.session_state.selected_streamer_6 not in label_map:
+            st.session_state.selected_streamer_6 = list(label_map.keys())[0]
+
+        selected_label = st.selectbox(
+            "스트리머를 선택하세요",
+            list(label_map.keys()),
+            index=list(label_map.keys()).index(st.session_state.selected_streamer_6),
+            key="streamer_map_agent_6"
         )
-        if selected_map != st.session_state.selected_map_6:
-            st.session_state.selected_map_6 = selected_map
+        if selected_label != st.session_state.selected_streamer_6:
+            st.session_state.selected_streamer_6 = selected_label
             st.rerun()
 
-        filtered = subset[subset["맵"] == selected_map]
+        selected_streamer = label_map[selected_label]
+        subset = df[df["스트리머 이름"] == selected_streamer]
+        map_options = sorted(subset["맵"].unique())
 
-        if not filtered.empty:
-            stats = filtered.groupby("사용한 요원").agg(agg_dict)
-            stats = compute_stats(stats)
-            stats = stats.sort_values("평균 전투 점수", ascending=True)
-            styled = style_dataframe(stats[column_order])
-            st.dataframe(styled, use_container_width=True, height=800)
+        if not map_options:
+            st.info("선택한 스트리머가 현재 필터 조건에 해당하는 맵 데이터를 가지고 있지 않습니다.")
         else:
-            st.info("선택된 조건에 해당하는 데이터가 없습니다.")
+            if 'selected_map_6' not in st.session_state or st.session_state.selected_map_6 not in map_options:
+                st.session_state.selected_map_6 = map_options[0]
+
+            selected_map = st.selectbox(
+                "맵을 선택하세요",
+                map_options,
+                index=map_options.index(st.session_state.selected_map_6),
+                key="map_by_streamer_6"
+            )
+            if selected_map != st.session_state.selected_map_6:
+                st.session_state.selected_map_6 = selected_map
+                st.rerun()
+
+            filtered = subset[subset["맵"] == selected_map]
+
+            if not filtered.empty:
+                stats = filtered.groupby("사용한 요원").agg(agg_dict)
+                stats = compute_stats(stats)
+                stats = stats.sort_values("평균 전투 점수", ascending=True)
+                styled = style_dataframe(stats[column_order])
+                st.dataframe(styled, use_container_width=True, height=800)
+            else:
+                st.info("선택된 조건에 해당하는 데이터가 없습니다.")
 
