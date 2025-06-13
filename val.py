@@ -71,7 +71,8 @@ menu = st.sidebar.radio("보기 항목을 선택하세요", (
     "3. 스트리머의 요원별 스탯",
     "5. 스트리머의 맵별 스탯",
     "6. 스트리머의 맵-요원별 스탯",
-    "4. 경기별 스트리머 스탯"
+    "4. 경기별 스트리머 스탯",
+    "7. 스트리머의 모든 경기 확인"
 ))
 
 # 컬럼 순서
@@ -278,4 +279,31 @@ elif menu == "6. 스트리머의 맵-요원별 스탯":
                 st.dataframe(styled, use_container_width=True, height=800)
             else:
                 st.info("선택된 조건에 해당하는 데이터가 없습니다.")
+
+elif menu == "7. 스트리머의 모든 경기 확인":
+    st.header("🧾 스트리머의 모든 경기 기록")
+
+    streamer_options = sorted(df["스트리머 이름"].unique())
+    if not streamer_options:
+        st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
+    else:
+        label_map = {f"[{streamer_tier_map.get(name, '-')}] {name}" if streamer_tier_map.get(name) != "용병" else f"[-] {name}": name for name in streamer_options}
+        selected_label = st.selectbox("스트리머를 선택하세요", list(label_map.keys()), key="streamer_all_matches")
+        selected_streamer = label_map[selected_label]
+        subset = df[df["스트리머 이름"] == selected_streamer].copy()
+
+        if subset.empty:
+            st.info("해당 스트리머의 경기 데이터가 없습니다.")
+        else:
+            for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
+                if col in subset.columns:
+                    subset[col] = subset[col].map(lambda x: f"{x:.2f}")
+
+            def highlight_win(row):
+                color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
+                return [f"background-color: {color}" for _ in row]
+
+            display_df = subset[["날짜", "스트리머 이름", "경기 번호", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "첫 킬", "KD", "KDA", "승패"]].sort_values(by=["날짜", "경기 번호"])
+            styled = display_df.style.apply(highlight_win, axis=1)
+            st.dataframe(styled, use_container_width=True, height=600)
 
