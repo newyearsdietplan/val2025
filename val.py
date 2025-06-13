@@ -217,20 +217,22 @@ elif menu == "5. 스트리머의 맵별 스탯":
 elif menu == "6. 스트리머의 맵-요원별 스탯":
     st.header("🧩 스트리머의 맵-요원별 스탯")
     streamer_options = sorted(df["스트리머 이름"].unique())
+    label_map = {format_streamer_label(name): name for name in streamer_options}
 
     if 'selected_streamer_6' not in st.session_state:
-        st.session_state.selected_streamer_6 = streamer_options[0]
+        st.session_state.selected_streamer_6 = list(label_map.keys())[0]
 
-    selected_streamer = st.selectbox(
+    selected_label = st.selectbox(
         "스트리머를 선택하세요",
-        streamer_options,
-        index=streamer_options.index(st.session_state.selected_streamer_6),
+        list(label_map.keys()),
+        index=list(label_map.keys()).index(st.session_state.selected_streamer_6),
         key="streamer_map_agent_6"
     )
-    if selected_streamer != st.session_state.selected_streamer_6:
-        st.session_state.selected_streamer_6 = selected_streamer
+    if selected_label != st.session_state.selected_streamer_6:
+        st.session_state.selected_streamer_6 = selected_label
         st.rerun()
 
+    selected_streamer = label_map[selected_label]
     subset = df[df["스트리머 이름"] == selected_streamer]
     map_options = sorted(subset["맵"].unique())
 
