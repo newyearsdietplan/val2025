@@ -130,7 +130,7 @@ if menu == "1. 스트리머별 종합 스탯":
     stats.insert(0, "티어", tiers_for_names)
 
     stats = stats.sort_values("평균 전투 점수", ascending=False)
-    stats.index = [f"[{tier}] {name}" if tier != "용병" else f"[-] {name}" for name, tier in zip(streamer_names, tiers_for_names)]
+    stats.index = [f"[-] {name}" if streamer_tier_map.get(name, "-") == "용병" else f"[{streamer_tier_map.get(name, '-')}] {name}" for name in stats.index]
     styled = style_dataframe(stats[column_order])
     st.dataframe(styled, use_container_width=True, height=800)
 
