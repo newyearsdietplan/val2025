@@ -119,8 +119,10 @@ if menu == "1. 스트리머별 종합 스탯":
     st.header("📊 스트리머별 종합 스탯")
     stats = df.groupby("스트리머 이름").agg(agg_dict)
     stats = compute_stats(stats)
+    stats.insert(0, "티어", stats.index.map(lambda x: streamer_tier_map.get(x, "-")))
     stats = stats.sort_values("평균 전투 점수", ascending=False)
     stats = stats.sort_values("평균 전투 점수", ascending=False)
+    stats.index = [f"[{stats.loc[name, '티어']}] {name}" for name in stats.index]
     styled = style_dataframe(stats[column_order])
     st.dataframe(styled, use_container_width=True, height=800)
 
