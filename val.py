@@ -175,22 +175,24 @@ elif menu == "3. 스트리머의 요원별 스탯":
 
 elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
-    available_dates = sorted(df["날짜"].unique())
+    
+    df_all = pd.read_csv("data.csv")
+    available_dates = sorted(df_all["날짜"].unique())
     if not available_dates:
-        st.info("선택한 필터에 해당하는 경기가 없습니다.")
+        st.info("경기 데이터가 없습니다.")
     else:
         selected_date = st.selectbox("날짜를 선택하세요", available_dates, key="date_select")
-        game_ids = df[df["날짜"] == selected_date]["경기 번호"].unique()
+        game_ids = df_all[df_all["날짜"] == selected_date]["경기 번호"].unique()
         game_options = []
         for gid in sorted(game_ids):
-            game_df = df[df["경기 번호"] == gid]
+            game_df = df_all[df_all["경기 번호"] == gid]
             players = game_df["스트리머 이름"].unique()
             map_name = game_df["맵"].iloc[0]
             label = f"{gid}번 경기 - {map_name} ({', '.join(players)})"
             game_options.append((label, gid))
         selected_label = st.selectbox("경기 번호를 선택하세요", [opt[0] for opt in game_options], key="game_select")
         selected_game = dict(game_options)[selected_label]
-        subset = df[df["경기 번호"] == selected_game].copy()
+        subset = df_all[df_all["경기 번호"] == selected_game].copy()
         for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
             subset[col] = subset[col].map(lambda x: f"{x:.2f}")
 
@@ -201,6 +203,9 @@ elif menu == "4. 경기별 스트리머 스탯":
         display_df = subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "첫 킬", "KD", "KDA", "승패"]]
         styled = display_df.style.apply(highlight_win, axis=1)
         st.dataframe(styled, use_container_width=True, height=400)
+
+        image_filename = f"screenshot/{selected_date}-{selected_game}.png"
+        st.image(image_filename, caption=image_filename)
 
         # 이미지 경로 및 출력
         image_filename = f"screenshot/{selected_date}-{selected_game}.png"
