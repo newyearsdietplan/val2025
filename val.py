@@ -142,7 +142,6 @@ if menu == "1. 스트리머별 종합 스탯":
     st.header("📊 스트리머별 종합 스탯")
     stats = df.groupby("스트리머 이름").agg(agg_dict)
     stats = compute_stats(stats)
-    stats.insert(0, "티어", [streamer_tier_map.get(n, "-") for n in stats.index])
     stats.index = [format_streamer_label(n) for n in stats.index]
     stats = stats.sort_values("평균 전투 점수", ascending=False)
     st.dataframe(style_dataframe(stats), use_container_width=True, height=800)
@@ -153,7 +152,6 @@ elif menu == "2. 맵별 스트리머 스탯":
     filtered = df[df["맵"] == selected_map]
     stats = filtered.groupby("스트리머 이름").agg(agg_dict)
     stats = compute_stats(stats)
-    stats.insert(0, "티어", [streamer_tier_map.get(n, "-") for n in stats.index])
     stats.index = [format_streamer_label(n) for n in stats.index]
     stats = stats.sort_values("평균 전투 점수", ascending=False)
     st.dataframe(style_dataframe(stats), use_container_width=True, height=800)
