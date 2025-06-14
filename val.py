@@ -6,6 +6,8 @@ st.set_page_config(layout="wide")
 
 # 데이터 로딩 및 컬럼 정리
 df = pd.read_csv("data.csv")
+df.columns = df.columns.str.strip()  # 공백 제거
+
 df.rename(columns={
     "닉네임": "스트리머 이름",
     "요원": "사용한 요원",
@@ -15,7 +17,11 @@ df.rename(columns={
 }, inplace=True)
 
 # 승패 숫자 변환
-df["승리"] = df["승패"].map({"v": 1, "l": 0})
+if "승패" in df.columns:
+    df["승리"] = df["승패"].map({"v": 1, "l": 0})
+else:
+    st.error("'승패' 컬럼이 누락되었습니다. data.csv 파일 구조를 확인하세요.")
+    st.stop()
 
 # 요원 역할 분류
 agent_roles = {
