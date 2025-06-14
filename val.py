@@ -170,18 +170,20 @@ elif menu == "3. 스트리머의 요원별 스탯":
 
 elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
-    game_info_options = []
-for game_id in sorted(df["경기 번호"].unique()):
-    game_df = df[df["경기 번호"] == game_id]
-    if not game_df.empty:
-        date = game_df["날짜"].iloc[0]
-        map_name = game_df["맵"].iloc[0]
-        players = ', '.join(sorted(game_df["스트리머 이름"].unique()))
-        label = f"{game_id}, {date}, {map_name}, {players}"
-        game_info_options.append((label, game_id))
 
-selected_label = st.selectbox("경기 번호를 선택하세요", [label for label, _ in game_info_options])
-selected_game = dict(game_info_options)[selected_label]
+    game_info_options = []
+    for game_id in sorted(df["경기 번호"].unique()):
+        game_df = df[df["경기 번호"] == game_id]
+        if not game_df.empty:
+            date = game_df["날짜"].iloc[0]
+            map_name = game_df["맵"].iloc[0]
+            players = ', '.join(sorted(game_df["스트리머 이름"].unique()))
+            label = f"{game_id}, {date}, {map_name}, {players}"
+            game_info_options.append((label, game_id))
+
+    selected_label = st.selectbox("경기 번호를 선택하세요", [label for label, _ in game_info_options])
+    selected_game = dict(game_info_options)[selected_label]
+
     subset = df[df["경기 번호"] == selected_game].copy()
 
     def highlight(row):
@@ -190,8 +192,11 @@ selected_game = dict(game_info_options)[selected_label]
 
     subset["KDA"] = subset.apply(compute_kda, axis=1)
     subset["KD"] = subset.apply(compute_kd, axis=1)
-    cols = ["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "ADR", "DDΔ", "HS%", "첫 킬", "KD", "KDA", "승패"]
+
+    cols = ["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트",
+            "ADR", "DDΔ", "HS%", "첫 킬", "KD", "KDA", "승패"]
     st.dataframe(subset[cols].style.apply(highlight, axis=1), use_container_width=True, height=600)
+
 
 elif menu == "5. 스트리머의 맵별 스탯":
     st.header("🧭 스트리머의 맵별 스탯")
