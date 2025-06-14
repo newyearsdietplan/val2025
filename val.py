@@ -194,7 +194,7 @@ elif menu == "4. 경기별 스트리머 스탯":
     subset["KDA"] = subset.apply(compute_kda, axis=1)
     subset["KD"] = subset.apply(compute_kd, axis=1)
 
-    cols = ["경기 번호", "날짜", "스트리머 이름", "맵", "사용한 요원", "전투 점수", "KD", "KDA", "ADR", "DDΔ", "HS%", "첫 킬", "킬", "데스", "어시스트", "승패"]
+    cols = ["경기 번호", "날짜", "스트리머 이름", "맵", "사용한 요원", "전투 점수", "KD", "KDA", "피해량", "피해량 격차", "헤드샷%", "첫 킬", "킬", "데스", "어시스트", "승패"]
     st.dataframe(subset[cols].style.apply(highlight, axis=1), use_container_width=True, height=600)
 
 
@@ -228,7 +228,7 @@ elif menu == "7. 스트리머의 모든 경기 확인":
     subset = df[df["스트리머 이름"] == selected].copy()
     subset["KDA"] = subset.apply(compute_kda, axis=1)
     subset["KD"] = subset.apply(compute_kd, axis=1)
-    cols = ["경기 번호", "날짜", "스트리머 이름", "맵", "사용한 요원", "전투 점수", "KD", "KDA", "ADR", "DDΔ", "HS%", "첫 킬", "킬", "데스", "어시스트", "승패"]
+    cols = ["경기 번호", "날짜", "스트리머 이름", "맵", "사용한 요원", "전투 점수", "KD", "KDA", "피해량", "피해량 격차", "헤드샷%", "첫 킬", "킬", "데스", "어시스트", "승패"]
     def highlight(row):
         color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
         return [f"background-color: {color}" for _ in row]
