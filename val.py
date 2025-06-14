@@ -87,6 +87,8 @@ def style_dataframe(df):
     return df.style.format({
         "승률": "{:.2f}",
         "전투 점수": "{:.2f}",
+        "KD": "{:.2f}",
+        "KDA": "{:.2f}",
         "평균 KD": "{:.2f}",
         "평균 KDA": "{:.2f}",
         "평균 킬": "{:.1f}",
