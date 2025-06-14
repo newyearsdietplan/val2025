@@ -171,7 +171,7 @@ elif menu == "3. 스트리머의 요원별 스탯":
 elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
     selected_game = st.selectbox("경기 번호를 선택하세요", sorted(df["경기 번호"].unique()))
-    subset = df[df["경기 번호"] == selected_game].copy()copy()
+    subset = df[df["경기 번호"] == selected_game].copy()
 
     def highlight(row):
         color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
