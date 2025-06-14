@@ -4,8 +4,18 @@ import pandas as pd
 # 화면 너비 조정
 st.set_page_config(layout="wide")
 
-# 데이터
+# 데이터 로딩 및 컬럼 정리
 df = pd.read_csv("data.csv")
+df.rename(columns={
+    "닉네임": "스트리머 이름",
+    "요원": "사용한 요원",
+    "ACS": "평균 전투 점수",
+    "FK": "첫 킬",
+    "HS": "HS%"
+}, inplace=True)
+
+# 승패 숫자 변환
+df["승리"] = df["승패"].map({"v": 1, "l": 0})
 
 # 요원 역할 분류
 agent_roles = {
@@ -15,7 +25,7 @@ agent_roles = {
     "전략가": ["바이퍼", "브림스톤", "아스트라", "오멘", "클로브", "하버"]
 }
 
-# 티어 필터
+# 티어 분류
 tiers = {
     "A": ["강지형", "김뚜띠", "조별하", "짜누"],
     "B": ["감제이", "뱅", "푸린", "핑맨"],
@@ -24,36 +34,28 @@ tiers = {
     "E": ["고수달", "따효니", "러너", "백곰파"]
 }
 
-# 용병 티어 자동 분류
-tiered_streamers = sum(tiers.values(), [])
+# 용병 자동 추가
+tiered = sum(tiers.values(), [])
 all_streamers = df["스트리머 이름"].unique()
-mercenaries = sorted(list(set(all_streamers) - set(tiered_streamers)))
+mercenaries = sorted(list(set(all_streamers) - set(tiered)))
 if mercenaries:
     tiers["용병"] = mercenaries
 
-streamer_tier_map = {}
-for tier, streamers in tiers.items():
-    for s in streamers:
-        streamer_tier_map[s] = tier
+streamer_tier_map = {s: tier for tier, lst in tiers.items() for s in lst}
 
-selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=[t for t in tiers.keys() if t != "용병"])
-selected_tier_streamers = sum([tiers[tier] for tier in selected_tiers], [])
-all_maps = sorted(df["맵"].unique())
-selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles.keys()))
-selected_agents = sum([agent_roles[role] for role in selected_roles], [])
-selected_maps = st.sidebar.multiselect("맵 필터", all_maps, default=all_maps)
+# 필터
+selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=[t for t in tiers if t != "용병"])
+selected_tier_streamers = sum([tiers[t] for t in selected_tiers], [])
+selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles))
+selected_agents = sum([agent_roles[r] for r in selected_roles], [])
+selected_maps = st.sidebar.multiselect("맵 필터", sorted(df["맵"].unique()), default=sorted(df["맵"].unique()))
 
-# 선택된 요원과 맵만 포함
-# 티어 필터 적용
+# 필터 적용
 df = df[df["스트리머 이름"].isin(selected_tier_streamers)]
 df = df[df["사용한 요원"].isin(selected_agents)]
 df = df[df["맵"].isin(selected_maps)]
-df = df[df["사용한 요원"].isin(selected_agents)]
 
-# 승패 변환
-df["승리"] = df["승패"].map({"v": 1, "l": 0})
-
-# 공통 함수: KDA 및 KD 계산
+# KDA, KD 계산
 def compute_kda(row):
     return (row["킬"] + row["어시스트"]) / row["데스"] if row["데스"] != 0 else row["킬"] + row["어시스트"]
 
@@ -63,51 +65,43 @@ def compute_kd(row):
 df["KDA"] = df.apply(compute_kda, axis=1)
 df["KD"] = df.apply(compute_kd, axis=1)
 
-st.title("🎮 발낳대 2025 내전 통계")
+# 정렬 기준
+def tier_sort_key(name):
+    order = ["A", "B", "C", "D", "E", "용병"]
+    return (order.index(streamer_tier_map.get(name, "용병")), name)
 
-menu = st.sidebar.radio("보기 항목을 선택하세요", (
-    "1. 스트리머별 종합 스탯",
-    "2. 맵별 스트리머 스탯",
-    "3. 스트리머의 요원별 스탯",
-    "5. 스트리머의 맵별 스탯",
-    "6. 스트리머의 맵-요원별 스탯",
-    "4. 경기별 스트리머 스탯",
-    "7. 스트리머의 모든 경기 확인"
-))
+def format_streamer_label(name):
+    tier = streamer_tier_map.get(name, "-")
+    return f"[-] {name}" if tier == "용병" else f"[{tier}] {name}"
 
-# 컬럼 순서
-column_order = ["총 경기 수", "승률", "평균 전투 점수", "평균 효율", "평균 첫 킬", "평균 KD", "평균 KDA", "총 승리 수", "평균 킬", "평균 데스", "평균 어시스트"]
-
-def compute_stats(grouped_df):
-    grouped_df.columns = [
-        "총 경기 수", "총 킬", "총 데스", "총 어시스트",
-        "총 첫 킬", "평균 첫 킬",
-        "평균 전투 점수", "평균 효율", "평균 KD", "평균 KDA",
-        "총 승리 수", "승률"
-    ]
-    # 총 킬, 데스, 어시스트를 평균으로 변경
-    grouped_df["평균 킬"] = grouped_df["총 킬"] / grouped_df["총 경기 수"]
-    grouped_df["평균 데스"] = grouped_df["총 데스"] / grouped_df["총 경기 수"]
-    grouped_df["평균 어시스트"] = grouped_df["총 어시스트"] / grouped_df["총 경기 수"]
-    grouped_df = grouped_df.drop(columns=["총 킬", "총 데스", "총 어시스트"])
-    grouped_df = grouped_df.sort_values("평균 전투 점수")
-    return grouped_df
-
-# 포맷 정의
 def style_dataframe(df):
-    styled = df.style.format({
+    return df.style.format({
         "승률": "{:.2f}",
         "평균 전투 점수": "{:.2f}",
-        "평균 효율": "{:.2f}",
-        "평균 첫 킬": "{:.2f}",
         "평균 KD": "{:.2f}",
         "평균 KDA": "{:.2f}",
         "평균 킬": "{:.1f}",
         "평균 데스": "{:.1f}",
-        "평균 어시스트": "{:.1f}"
+        "평균 어시스트": "{:.1f}",
+        "평균 ADR": "{:.2f}",
+        "평균 DDΔ": "{:.2f}",
+        "평균 HS%": "{:.1f}"
     })
-    return styled
 
+# 통계 계산 함수
+def compute_stats(g):
+    g.columns = [
+        "총 경기 수", "총 킬", "총 데스", "총 어시스트",
+        "총 첫 킬", "평균 첫 킬",
+        "평균 전투 점수", "평균 ADR", "평균 DDΔ", "평균 HS%",
+        "평균 KD", "평균 KDA", "총 승리 수", "승률"
+    ]
+    g["평균 킬"] = g["총 킬"] / g["총 경기 수"]
+    g["평균 데스"] = g["총 데스"] / g["총 경기 수"]
+    g["평균 어시스트"] = g["총 어시스트"] / g["총 경기 수"]
+    return g.drop(columns=["총 킬", "총 데스", "총 어시스트"])
+
+# 공통 집계 사전
 agg_dict = {
     "경기 번호": "nunique",
     "킬": "sum",
@@ -115,201 +109,106 @@ agg_dict = {
     "어시스트": "sum",
     "첫 킬": ["sum", "mean"],
     "평균 전투 점수": "mean",
-    "효율 등급": "mean",
+    "ADR": "mean",
+    "DDΔ": "mean",
+    "HS%": "mean",
     "KD": "mean",
     "KDA": "mean",
     "승리": ["sum", "mean"]
 }
 
-def format_streamer_label(name):
-    tier = streamer_tier_map.get(name, "-")
-    return f"[-] {name}" if tier == "용병" else f"[{tier}] {name}"
+# 메인 타이틀
+st.title("🎮 발낳대 2025 내전 통계")
 
-def extract_streamer_name(label):
-    return label.split("] ")[-1]
-
-# 티어 오름차순 정렬
-def tier_sort_key(name):
-    tier_order = ["A", "B", "C", "D", "E", "용병"]
-    tier = streamer_tier_map.get(name, "용병")
-    return (tier_order.index(tier), name)
+# 메뉴 선택
+menu = st.sidebar.radio("보기 항목을 선택하세요", (
+    "1. 스트리머별 종합 스탯",
+    "2. 맵별 스트리머 스탯",
+    "3. 스트리머의 요원별 스탯",
+    "4. 경기별 스트리머 스탯",
+    "5. 스트리머의 맵별 스탯",
+    "6. 스트리머의 맵-요원별 스탯",
+    "7. 스트리머의 모든 경기 확인"
+))
 
 if menu == "1. 스트리머별 종합 스탯":
     st.header("📊 스트리머별 종합 스탯")
     stats = df.groupby("스트리머 이름").agg(agg_dict)
     stats = compute_stats(stats)
-
-    streamer_names = stats.index.tolist()
-    tiers_for_names = [streamer_tier_map.get(name, "-") for name in streamer_names]
-    stats.insert(0, "티어", tiers_for_names)
-
+    stats.insert(0, "티어", [streamer_tier_map.get(n, "-") for n in stats.index])
+    stats.index = [format_streamer_label(n) for n in stats.index]
     stats = stats.sort_values("평균 전투 점수", ascending=False)
-    stats.index = [f"[-] {name}" if streamer_tier_map.get(name, "-") == "용병" else f"[{streamer_tier_map.get(name, '-')}] {name}" for name in stats.index]
-    styled = style_dataframe(stats[column_order])
-    st.dataframe(styled, use_container_width=True, height=800)
+    st.dataframe(style_dataframe(stats), use_container_width=True, height=800)
 
 elif menu == "2. 맵별 스트리머 스탯":
     st.header("🗺️ 맵별 스트리머 스탯")
-    selected_map = st.selectbox("맵을 선택하세요", sorted(df["맵"].unique()), key="map_select")
-    subset = df[df["맵"] == selected_map]
-    stats = subset.groupby("스트리머 이름").agg(agg_dict)
+    selected_map = st.selectbox("맵을 선택하세요", sorted(df["맵"].unique()))
+    filtered = df[df["맵"] == selected_map]
+    stats = filtered.groupby("스트리머 이름").agg(agg_dict)
     stats = compute_stats(stats)
-
-    streamer_names = stats.index.tolist()
-    tiers_for_names = [streamer_tier_map.get(name, streamer_tier_map.get(name, "-")) for name in streamer_names]
-    stats.insert(0, "티어", tiers_for_names)
-
+    stats.insert(0, "티어", [streamer_tier_map.get(n, "-") for n in stats.index])
+    stats.index = [format_streamer_label(n) for n in stats.index]
     stats = stats.sort_values("평균 전투 점수", ascending=False)
-    stats.index = [f"[-] {name}" if streamer_tier_map.get(name, "-") == "용병" else f"[{streamer_tier_map.get(name, '-')}] {name}" for name in stats.index]
-    styled = style_dataframe(stats[column_order])
-    st.dataframe(styled, use_container_width=True, height=800)
+    st.dataframe(style_dataframe(stats), use_container_width=True, height=800)
 
 elif menu == "3. 스트리머의 요원별 스탯":
     st.header("🧍‍♀️ 스트리머의 요원별 스탯")
     streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
-    if not streamer_options:
-        st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
-    else:
-        label_map = {format_streamer_label(name): name for name in streamer_options}
-        selected_label = st.selectbox("스트리머를 선택하세요", list(label_map.keys()), key="streamer_select")
-        selected_streamer = label_map[selected_label]
-        subset = df[df["스트리머 이름"] == selected_streamer]
-        stats = subset.groupby("사용한 요원").agg(agg_dict)
-        stats = compute_stats(stats)
-        stats = stats.sort_values("평균 전투 점수", ascending=False)
-        styled = style_dataframe(stats[column_order])
-        st.dataframe(styled, use_container_width=True, height=800)
+    selected = st.selectbox("스트리머를 선택하세요", streamer_options)
+    subset = df[df["스트리머 이름"] == selected]
+    stats = subset.groupby("사용한 요원").agg(agg_dict)
+    stats = compute_stats(stats)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
+    st.dataframe(style_dataframe(stats), use_container_width=True, height=800)
 
 elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
-    
-    df_all = pd.read_csv("data.csv")  # 원본 데이터에서 필터 없이 사용
-    df_all["KDA"] = df_all.apply(compute_kda, axis=1)
-    df_all["KD"] = df_all.apply(compute_kd, axis=1)
+    selected_date = st.selectbox("날짜를 선택하세요", sorted(df["날짜"].unique()))
+    selected_games = df[df["날짜"] == selected_date]["경기 번호"].unique()
+    selected_game = st.selectbox("경기 번호를 선택하세요", selected_games)
+    subset = df[df["경기 번호"] == selected_game].copy()
 
-    available_dates = sorted(df_all["날짜"].unique())
-    if not available_dates:
-        st.info("경기 데이터가 없습니다.")
-    else:
-        selected_date = st.selectbox("날짜를 선택하세요", available_dates, key="date_select")
-        game_ids = df_all[df_all["날짜"] == selected_date]["경기 번호"].unique()
-        game_options = []
-        for gid in sorted(game_ids):
-            game_df = df_all[df_all["경기 번호"] == gid]
-            players = game_df["스트리머 이름"].unique()
-            map_name = game_df["맵"].iloc[0]
-            label = f"{gid}번 경기 - {map_name} ({', '.join(players)})"
-            game_options.append((label, gid))
-        selected_label = st.selectbox("경기 번호를 선택하세요", [opt[0] for opt in game_options], key="game_select")
-        selected_game = dict(game_options)[selected_label]
-        subset = df_all[df_all["경기 번호"] == selected_game].copy()
-        for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
-            if col in subset.columns:
-                subset[col] = subset[col].map(lambda x: f"{x:.2f}")
+    def highlight(row):
+        color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
+        return [f"background-color: {color}" for _ in row]
 
-        def highlight_win(row):
-            color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
-            return [f"background-color: {color}" for _ in row]
-
-        display_df = subset[["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "첫 킬", "KD", "KDA", "승패"]]
-        styled = display_df.style.apply(highlight_win, axis=1)
-        st.dataframe(styled, use_container_width=True, height=400)
-
-        image_filename = f"screenshot/{selected_date}-{selected_game}.png"
-        st.image(image_filename, caption=image_filename)
+    subset["KDA"] = subset.apply(compute_kda, axis=1)
+    subset["KD"] = subset.apply(compute_kd, axis=1)
+    cols = ["날짜", "스트리머 이름", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "ADR", "DDΔ", "HS%", "첫 킬", "KD", "KDA", "승패"]
+    st.dataframe(subset[cols].style.apply(highlight, axis=1), use_container_width=True, height=600)
 
 elif menu == "5. 스트리머의 맵별 스탯":
-    st.header("🧭 스트리머의 맵별 스탯")  
+    st.header("🧭 스트리머의 맵별 스탯")
     streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
-    if not streamer_options:
-        st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
-    else:
-        label_map = {format_streamer_label(name): name for name in streamer_options}
-        selected_label = st.selectbox("스트리머를 선택하세요", list(label_map.keys()), key="streamer_map")
-        selected_streamer = label_map[selected_label]
-        subset = df[df["스트리머 이름"] == selected_streamer]
-        stats = subset.groupby("맵").agg(agg_dict)
-        stats = compute_stats(stats)
-        stats = stats.sort_values("평균 전투 점수", ascending=False)
-        styled = style_dataframe(stats[column_order])
-        st.dataframe(styled, use_container_width=True, height=800)
+    selected = st.selectbox("스트리머를 선택하세요", streamer_options)
+    subset = df[df["스트리머 이름"] == selected]
+    stats = subset.groupby("맵").agg(agg_dict)
+    stats = compute_stats(stats)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
+    st.dataframe(style_dataframe(stats), use_container_width=True, height=800)
 
 elif menu == "6. 스트리머의 맵-요원별 스탯":
     st.header("🧩 스트리머의 맵-요원별 스탯")
     streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
-    if not streamer_options:
-        st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
-    else:
-        label_map = {format_streamer_label(name): name for name in streamer_options}
-
-        if 'selected_streamer_6' not in st.session_state or st.session_state.selected_streamer_6 not in label_map:
-            st.session_state.selected_streamer_6 = list(label_map.keys())[0]
-
-        selected_label = st.selectbox(
-            "스트리머를 선택하세요",
-            list(label_map.keys()),
-            index=list(label_map.keys()).index(st.session_state.selected_streamer_6),
-            key="streamer_map_agent_6"
-        )
-        if selected_label != st.session_state.selected_streamer_6:
-            st.session_state.selected_streamer_6 = selected_label
-            st.rerun()
-
-        selected_streamer = label_map[selected_label]
-        subset = df[df["스트리머 이름"] == selected_streamer]
-        map_options = sorted(subset["맵"].unique())
-
-        if not map_options:
-            st.info("선택한 스트리머가 현재 필터 조건에 해당하는 맵 데이터를 가지고 있지 않습니다.")
-        else:
-            if 'selected_map_6' not in st.session_state or st.session_state.selected_map_6 not in map_options:
-                st.session_state.selected_map_6 = map_options[0]
-
-            selected_map = st.selectbox(
-                "맵을 선택하세요",
-                map_options,
-                index=map_options.index(st.session_state.selected_map_6),
-                key="map_by_streamer_6"
-            )
-            if selected_map != st.session_state.selected_map_6:
-                st.session_state.selected_map_6 = selected_map
-                st.rerun()
-
-            filtered = subset[subset["맵"] == selected_map]
-
-            if not filtered.empty:
-                stats = filtered.groupby("사용한 요원").agg(agg_dict)
-                stats = compute_stats(stats)
-                stats = stats.sort_values("평균 전투 점수", ascending=True)
-                styled = style_dataframe(stats[column_order])
-                st.dataframe(styled, use_container_width=True, height=800)
-            else:
-                st.info("선택된 조건에 해당하는 데이터가 없습니다.")
+    selected = st.selectbox("스트리머를 선택하세요", streamer_options)
+    subset = df[df["스트리머 이름"] == selected]
+    map_options = sorted(subset["맵"].unique())
+    selected_map = st.selectbox("맵을 선택하세요", map_options)
+    filtered = subset[subset["맵"] == selected_map]
+    stats = filtered.groupby("사용한 요원").agg(agg_dict)
+    stats = compute_stats(stats)
+    stats = stats.sort_values("평균 전투 점수", ascending=False)
+    st.dataframe(style_dataframe(stats), use_container_width=True, height=800)
 
 elif menu == "7. 스트리머의 모든 경기 확인":
     st.header("🧾 스트리머의 모든 경기 기록")
-
     streamer_options = sorted(df["스트리머 이름"].unique(), key=tier_sort_key)
-    if not streamer_options:
-        st.info("선택한 필터에 해당하는 스트리머가 없습니다.")
-    else:
-        label_map = {f"[{streamer_tier_map.get(name, '-')}] {name}" if streamer_tier_map.get(name) != "용병" else f"[-] {name}": name for name in streamer_options}
-        selected_label = st.selectbox("스트리머를 선택하세요", list(label_map.keys()), key="streamer_all_matches")
-        selected_streamer = label_map[selected_label]
-        subset = df[df["스트리머 이름"] == selected_streamer].copy()
-
-        if subset.empty:
-            st.info("해당 스트리머의 경기 데이터가 없습니다.")
-        else:
-            for col in ["KD", "KDA", "평균 전투 점수", "효율 등급"]:
-                if col in subset.columns:
-                    subset[col] = subset[col].map(lambda x: f"{x:.2f}")
-
-            def highlight_win(row):
-                color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
-                return [f"background-color: {color}" for _ in row]
-
-            display_df = subset[["날짜", "스트리머 이름", "경기 번호", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "효율 등급", "첫 킬", "KD", "KDA", "승패"]].sort_values(by=["날짜", "경기 번호"])
-            styled = display_df.style.apply(highlight_win, axis=1)
-            st.dataframe(styled, use_container_width=True, height=600)
-
+    selected = st.selectbox("스트리머를 선택하세요", streamer_options)
+    subset = df[df["스트리머 이름"] == selected].copy()
+    subset["KDA"] = subset.apply(compute_kda, axis=1)
+    subset["KD"] = subset.apply(compute_kd, axis=1)
+    cols = ["날짜", "스트리머 이름", "경기 번호", "맵", "사용한 요원", "평균 전투 점수", "킬", "데스", "어시스트", "ADR", "DDΔ", "HS%", "첫 킬", "KD", "KDA", "승패"]
+    def highlight(row):
+        color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
+        return [f"background-color: {color}" for _ in row]
+    st.dataframe(subset[cols].sort_values(by=["날짜", "경기 번호"]).style.apply(highlight, axis=1), use_container_width=True, height=600)
