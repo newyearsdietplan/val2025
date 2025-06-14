@@ -55,6 +55,7 @@ with st.sidebar:
         st.session_state.selected_tiers = [t for t in tiers if t != "용병"]
     if st.button("티어 전체 선택"):
         st.session_state.selected_tiers = list(tiers.keys())
+        st.experimental_rerun()
     selected_tiers = st.multiselect("티어 필터", list(tiers.keys()), default=st.session_state.selected_tiers, key="tier_multiselect")
 selected_tier_streamers = sum([tiers[t] for t in selected_tiers], [])
 selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles))
