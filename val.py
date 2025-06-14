@@ -170,7 +170,18 @@ elif menu == "3. 스트리머의 요원별 스탯":
 
 elif menu == "4. 경기별 스트리머 스탯":
     st.header("📅 경기별 스트리머 스탯")
-    selected_game = st.selectbox("경기 번호를 선택하세요", sorted(df["경기 번호"].unique()))
+    game_info_options = []
+for game_id in sorted(df["경기 번호"].unique()):
+    game_df = df[df["경기 번호"] == game_id]
+    if not game_df.empty:
+        date = game_df["날짜"].iloc[0]
+        map_name = game_df["맵"].iloc[0]
+        players = ', '.join(sorted(game_df["스트리머 이름"].unique()))
+        label = f"{game_id}, {date}, {map_name}, {players}"
+        game_info_options.append((label, game_id))
+
+selected_label = st.selectbox("경기 번호를 선택하세요", [label for label, _ in game_info_options])
+selected_game = dict(game_info_options)[selected_label]
     subset = df[df["경기 번호"] == selected_game].copy()
 
     def highlight(row):
