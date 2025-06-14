@@ -50,17 +50,12 @@ if mercenaries:
 streamer_tier_map = {s: tier for tier, lst in tiers.items() for s in lst}
 
 # 필터
-with st.sidebar:
-    if "selected_tiers" not in st.session_state:
-        st.session_state.selected_tiers = [t for t in tiers if t != "용병"]
-    if st.button("티어 전체 선택"):
-        st.session_state.selected_tiers = list(tiers.keys())
-        st.session_state.run_rerun = True
-    selected_tiers = st.multiselect("티어 필터", list(tiers.keys()), default=st.session_state.selected_tiers, key="tier_multiselect")
-selected_tier_streamers = sum([tiers[t] for t in selected_tiers], [])
-selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles))
-selected_agents = sum([agent_roles[r] for r in selected_roles], [])
-selected_maps = st.sidebar.multiselect("맵 필터", sorted(df["맵"].unique()), default=sorted(df["맵"].unique()))
+selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=[t for t in tiers.keys() if t != "용병"])
+selected_tier_streamers = sum([tiers[tier] for tier in selected_tiers], [])
+all_maps = sorted(df["맵"].unique())
+selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles.keys()))
+selected_agents = sum([agent_roles[role] for role in selected_roles], [])
+selected_maps = st.sidebar.multiselect("맵 필터", all_maps, default=all_maps)
 
 # 필터 적용
 df = df[df["스트리머 이름"].isin(selected_tier_streamers)]
