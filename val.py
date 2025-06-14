@@ -99,7 +99,7 @@ def style_dataframe(df):
 def compute_stats(g):
     g.columns = [
         "총 경기 수", "총 킬", "총 데스", "총 어시스트",
-        "총 첫 킬", "평균 첫 킬",
+        "평균 첫 킬",
         "평균 전투 점수", "평균 ADR", "평균 DDΔ", "평균 HS%",
         "평균 KD", "평균 KDA", "총 승리 수", "승률"
     ]
