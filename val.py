@@ -53,8 +53,7 @@ streamer_tier_map = {s: tier for tier, lst in tiers.items() for s in lst}
 with st.sidebar:
     if "selected_tiers" not in st.session_state:
         st.session_state.selected_tiers = [t for t in tiers if t != "용병"]
-    tier_select_all = st.button("티어 전체 선택")
-    if tier_select_all:
+    if st.button("티어 전체 선택"):
         st.session_state.selected_tiers = list(tiers.keys())
     selected_tiers = st.multiselect("티어 필터", list(tiers.keys()), default=st.session_state.selected_tiers, key="tier_multiselect")
 selected_tier_streamers = sum([tiers[t] for t in selected_tiers], [])
