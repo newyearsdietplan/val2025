@@ -50,6 +50,10 @@ if mercenaries:
 streamer_tier_map = {s: tier for tier, lst in tiers.items() for s in lst}
 
 # 필터
+if st.sidebar.checkbox("전체 티어 선택", value=True):
+    selected_tiers = list(tiers.keys())
+else:
+    selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=[t for t in tiers if t != "용병"])
 selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=[t for t in tiers if t != "용병"])
 selected_tier_streamers = sum([tiers[t] for t in selected_tiers], [])
 selected_roles = st.sidebar.multiselect("요원 역할 필터", agent_roles.keys(), default=list(agent_roles))
