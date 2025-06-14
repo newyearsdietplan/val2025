@@ -234,4 +234,4 @@ elif menu == "7. 스트리머의 모든 경기 확인":
     def highlight(row):
         color = "#d1f0d1" if row["승패"] == "v" else "#f8d0d0"
         return [f"background-color: {color}" for _ in row]
-    st.dataframe(subset[cols].sort_values(by=["날짜", "경기 번호"]).style.apply(highlight, axis=1), use_container_width=True, height=600)
+    st.dataframe(style_dataframe(subset[cols].sort_values(by=["날짜", "경기 번호"])).apply(highlight, axis=1), use_container_width=True, height=600)
