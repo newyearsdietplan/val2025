@@ -9,6 +9,10 @@ df = pd.read_csv("data.csv")
 df.columns = df.columns.str.strip()  # 공백 제거
 
 df.rename(columns={
+    "닉네임": "스트리머 이름",
+    "요원": "사용한 요원",
+    "ACS": "평균 전투 점수",
+    "FK": "첫 킬",
     "HS": "HS%"
 }, inplace=True)
 
