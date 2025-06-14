@@ -84,6 +84,7 @@ def style_dataframe(df):
     return df.style.format({
         "승률": "{:.2f}",
         "평균 전투 점수": "{:.2f}",
+        "평균 첫 킬": "{:.1f}",
         "평균 KD": "{:.2f}",
         "평균 KDA": "{:.2f}",
         "평균 킬": "{:.1f}",
@@ -113,7 +114,7 @@ agg_dict = {
     "킬": "sum",
     "데스": "sum",
     "어시스트": "sum",
-    "첫 킬": ["sum", "mean"],
+    "첫 킬": "mean",
     "평균 전투 점수": "mean",
     "ADR": "mean",
     "DDΔ": "mean",
