@@ -51,6 +51,9 @@ if mercenaries:
 
 streamer_tier_map = {s: tier for tier, lst in tiers.items() for s in lst}
 
+with st.sidebar:
+    st.markdown("[📂 발낳대 2025 스크림 통계](val_scream.py)")
+
 # 필터
 selected_tiers = st.sidebar.multiselect("티어 필터", list(tiers.keys()), default=[t for t in tiers.keys() if t != "용병"])
 selected_tier_streamers = sum([tiers[tier] for tier in selected_tiers], [])
